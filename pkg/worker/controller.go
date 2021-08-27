@@ -8,7 +8,6 @@ import (
 	"github.office.opendns.com/quadra/linux-job/pkg/worker/exec"
 	"github.office.opendns.com/quadra/linux-job/pkg/worker/log"
 	logging "log"
-	stdexec "os/exec"
 	"sync"
 )
 
@@ -41,7 +40,6 @@ type (
 		Id string
 	}
 
-	Jobtest map[int]*stdexec.Cmd
 )
 
 func NewController() *Controller {
