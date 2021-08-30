@@ -1,14 +1,15 @@
 package command
 
 import (
-"context"
-"errors"
-"fmt"
-"os"
-"time"
+	"context"
+	"errors"
+	"fmt"
+	"google.golang.org/grpc/metadata"
+	"os"
+	"time"
 
-pb "github.office.opendns.com/quadra/linux-job/pkg/grpc/proto"
-"google.golang.org/grpc"
+	pb "github.office.opendns.com/quadra/linux-job/pkg/grpc/proto"
+	"google.golang.org/grpc"
 )
 
 type StatusCommand struct {
@@ -26,11 +27,13 @@ func (c *StatusCommand) Run(args []string) error {
 		return errors.New("you must pass an argument")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	newCtx := metadata.AppendToOutgoingContext(ctx, "jobid", args[0])
 	defer cancel()
 	command := pb.StatusRequest{
 		Id: args[0],
 	}
-	res, err := c.client.Status(ctx, &command, grpc.WaitForReady(true))
+
+	res, err := c.client.Status(newCtx, &command, grpc.WaitForReady(true))
 	if err != nil {
 		return err
 	}
