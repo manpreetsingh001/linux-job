@@ -22,7 +22,7 @@ func Execute(config conf.Config, args []string) error {
 	}
 	cmds := map[string]Runner{
 		"start":  NewStartCommand(client),
-		"query":  NewStatusCommand(client),
+		"status":  NewStatusCommand(client),
 		"stop":   NewStopCommand(client),
 		"stream": NewStreamCommand(client),
 	}
