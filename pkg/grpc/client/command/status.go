@@ -38,6 +38,23 @@ func (c *StatusCommand) Run(args []string) error {
 		return err
 	}
 	os.Stdout.WriteString(fmt.Sprintf("Pid: %v Exit code: %v", res.PID, res.ExitCode))
+	printStatus(res)
 	return nil
 }
 
+func printStatus(s *pb.ProcessStatus) {
+	var state string
+
+	switch s.State {
+	case pb.JobState_Fatal:
+		state = "fatal"
+	case pb.JobState_Finished:
+		state = "finished"
+	default:
+		state = "running"
+	}
+
+	fmt.Printf("Job ID: %15s\n", s.Id)
+	fmt.Printf("Job Status: %15s\n", state)
+	fmt.Printf("Start time: %15s\n", time.Unix(0, s.StartTime))
+}
