@@ -52,6 +52,14 @@ Mon Aug 30 13:41:30 PDT 2021
 
 MANPSIN4-M-C3HM:linux-job manpsin4$ ./worker-client  stop  8404f495-474c-4508-9704-bbb68372887b 
 Job 8404f495-474c-4508-9704-bbb68372887b  has been stopped
+
+
+
+untrusted client
+
+MANPSIN4-M-C3HM:linux-job manpsin4$ ./worker-client status f3b30538-61b6-45d9-b4f6-07e61a6696ae
+rpc error: code = DeadlineExceeded desc = latest balancer error: connection error: desc = "transport: authentication handshake failed: x509: certificate signed by unknown authority"MANPSIN4-M-C3HM:linux-job manpsin4$ 
+
 ```
 
 ### What is left:
