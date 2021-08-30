@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	pb "github.office.opendns.com/quadra/linux-job/pkg/grpc/proto"
 	"github.office.opendns.com/quadra/linux-job/pkg/grpc/util"
 	"github.office.opendns.com/quadra/linux-job/pkg/worker"
@@ -74,9 +75,12 @@ func (w *WorkerServer) StreamLogs(req *pb.StreamLogRequest, stream pb.WorkerServ
 	if err != nil {
 		return status.Error(codes.NotFound, err.Error())
 	}
-
+	//for i := range bytes {
+	//	fmt.Printf("debug %s",string(i.Bytes))
+	//}
 	for out := range bytes {
 		if err = stream.Send(util.ConvertToPbStream(out)); err != nil {
+			fmt.Printf("Debug: stream error %s",err)
 			return err
 		}
 	}

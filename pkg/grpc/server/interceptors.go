@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
+	logging "log"
 )
 
 
@@ -44,6 +45,7 @@ func (w *WorkerServer) clientAccessToJob(client, jobId string) bool {
 func (w *WorkerServer) authorize(ctx context.Context, method string) (context.Context, error) {
 	// reads the peer information from the context
 	p, ok := peer.FromContext(ctx)
+	logging.Println("I ma trying to autorized the section hdsdbsdbdb")
 	if !ok {
 		return nil, errors.New("error to read peer info")
 	}
@@ -73,6 +75,7 @@ func (w *WorkerServer) authorize(ctx context.Context, method string) (context.Co
 	if !ok {
 		return nil, status.Error(codes.NotFound, "missing jobid in metadata")
 	}
+	logging.Println("authorized")
 
 	if w.clientAccessToJob(cn, jobId[0]) {
 		return nil, status.Error(codes.PermissionDenied, "Not authorized to access the job")

@@ -4,10 +4,14 @@ import (
 	"bufio"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/oleiade/lane"
 	"google.golang.org/grpc/metadata"
 	"io"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	pb "github.office.opendns.com/quadra/linux-job/pkg/grpc/proto"
 	"google.golang.org/grpc"
@@ -28,22 +32,67 @@ func (c *StreamCommand) Run(args []string) error {
 		return errors.New("you must pass an argument")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	newCtx := metadata.AppendToOutgoingContext(ctx, "jobid", args[0])
+	defer cancel()
+
+	return c.getOutput(ctx, args[0])
+}
+
+
+func (c *StreamCommand) getOutput(ctx context.Context, id string) error {
+	newCtx, cancel := context.WithCancel(ctx)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		select {
+		case <-sig:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
+
+	ch, err := c.Watch(newCtx, id)
+
+	if err != nil {
+		return err
+	}
+
+	for o := range ch {
+		if o.Err == io.EOF {
+			return nil
+		}
+
+		if o.Err != nil {
+			return o.Err
+		}
+
+		switch o.Output.Channel {
+		case pb.StreamChannel_StdOut:
+			fmt.Fprintln(os.Stdout, o.Output.Msg)
+		default:
+			fmt.Fprintln(os.Stderr, o.Output.Msg)
+		}
+	}
+
+	return nil
+}
+
+func (c *StreamCommand) Watch(ctx context.Context, id string) (<-chan OutputMessage, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	newCtx := metadata.AppendToOutgoingContext(ctx, "jobid", id)
 	command := pb.StreamLogRequest{
-		Id: args[0],
+		Id: id,
 	}
 	res, err := c.client.StreamLogs(newCtx, &command, grpc.WaitForReady(true))
 	if err != nil {
 		cancel()
-		return err
+		return nil, err
 	}
-
 	ch := make(chan OutputMessage, 2)
-
 	go readOutput(ctx, res, ch)
-	return nil
+	return ch, nil
 }
-
 
 type byteBuf struct {
 	buf []byte

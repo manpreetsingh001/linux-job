@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	pb "github.office.opendns.com/quadra/linux-job/pkg/grpc/proto"
 	"github.office.opendns.com/quadra/linux-job/pkg/worker"
 	"github.office.opendns.com/quadra/linux-job/pkg/worker/exec"
@@ -44,5 +45,6 @@ func ConvertToPbStream(l log.LogOutput) *pb.ProcessStream {
 	default:
 		c = pb.StreamChannel_StdErr
 	}
+	fmt.Printf("debug %s",l.Bytes)
 	return &pb.ProcessStream{Output: l.Bytes, Channel: c}
 }
