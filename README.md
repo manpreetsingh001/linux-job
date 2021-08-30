@@ -14,6 +14,7 @@ go test ./...
 ### Build Binary
 
 ```
+go mod vendor   in root directory 
 api:
 go build -o worker-api cmd/api/main.go
 
